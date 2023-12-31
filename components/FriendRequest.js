@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable, Image } from "react-native";
+import { StyleSheet, Text, Pressable, Image } from "react-native";
 import React from "react";
 import { useContext } from "react";
 import { UserType } from "../UserContext";
