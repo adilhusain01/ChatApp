@@ -31,6 +31,7 @@ const HomeScreen = () => {
           }}
         >
           <Ionicons
+            onPress={() => navigation.navigate("Chats")}
             name="ios-chatbubble-ellipses-outline"
             size={24}
             color="black"

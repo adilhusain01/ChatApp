@@ -152,3 +152,52 @@ app.post("/friend-request", async (req, res) => {
 });
 
 //endpoint for showing all the friend requests
+app.get("/friend-request/:userId", async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    //fetch the user document based on the user Id
+
+    const user = await User.findById(userId)
+      .populate("freindRequests", "name email image")
+      .lean();
+
+    const freindRequests = user.freindRequests;
+
+    res.json(freindRequests);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error " });
+  }
+});
+
+//endpoint to accept a request of a person
+
+app.post("/friend-request/accept", async (req, res) => {
+  try {
+    const { senderId, recepientId } = req.body;
+
+    //retrieve the documents of the sender and the recepient
+    const sender = await User.findById(senderId);
+    const recepient = await User.findById(recepientId);
+
+    sender.friends.push(recepientId);
+    recepient.friends.push(senderId);
+
+    recepient.freindRequests = recepient.freindRequests.filter(
+      (request) => request.toString() !== senderId.toString()
+    );
+
+    sender.sentFriendRequests = sender.sentFriendRequests.filter(
+      (request) => request.toString() !== recepientId.toString()
+    );
+
+    await sender.save();
+    await recepient.save();
+
+    res.status(200).json({ message: "Friend request accepted" });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: "Internal Server Error " });
+  }
+});
