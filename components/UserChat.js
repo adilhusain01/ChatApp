@@ -1,10 +1,49 @@
-import { StyleSheet, Text, Pressable, View, Image } from "react-native";
-import React from "react";
+import { StyleSheet, Text, View, Pressable, Image } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
+import { UserType } from "../UserContext";
 
 const UserChat = ({ item }) => {
+  const { userId, setUserId } = useContext(UserType);
+  const [messages, setMessages] = useState([]);
   const navigation = useNavigation();
+  const fetchMessages = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/messages/${userId}/${item._id}`
+      );
+      const data = await response.json();
 
+      if (response.ok) {
+        setMessages(data);
+      } else {
+        console.log("error showing messags", response.status.message);
+      }
+    } catch (error) {
+      console.log("error fetching messages", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchMessages();
+  }, []);
+  console.log(messages);
+
+  const getLastMessage = () => {
+    const userMessages = messages.filter(
+      (message) => message.messageType === "text"
+    );
+
+    const n = userMessages.length;
+
+    return userMessages[n - 1];
+  };
+  const lastMessage = getLastMessage();
+  console.log(lastMessage);
+  const formatTime = (time) => {
+    const options = { hour: "numeric", minute: "numeric" };
+    return new Date(time).toLocaleString("en-US", options);
+  };
   return (
     <Pressable
       onPress={() =>
@@ -17,7 +56,7 @@ const UserChat = ({ item }) => {
         alignItems: "center",
         gap: 10,
         borderWidth: 0.7,
-        borderColor: "#d0d0d0",
+        borderColor: "#D0D0D0",
         borderTopWidth: 0,
         borderLeftWidth: 0,
         borderRightWidth: 0,
@@ -28,23 +67,19 @@ const UserChat = ({ item }) => {
         style={{ width: 50, height: 50, borderRadius: 25, resizeMode: "cover" }}
         source={{ uri: item?.image }}
       />
+
       <View style={{ flex: 1 }}>
-        <Text style={{ fontSize: 15, fontWeight: 500 }}>{item?.name}</Text>
-        <Text style={{ color: "gray", marginTop: 3, fontWeight: 500 }}>
-          last message comes here
-        </Text>
+        <Text style={{ fontSize: 15, fontWeight: "500" }}>{item?.name}</Text>
+        {lastMessage && (
+          <Text style={{ marginTop: 3, color: "gray", fontWeight: "500" }}>
+            {lastMessage?.message}
+          </Text>
+        )}
       </View>
 
       <View>
-        <Text
-          style={{
-            color: "gray",
-            fontWeight: 500,
-            fontSize: 13,
-            color: "#585858",
-          }}
-        >
-          3:00 pm
+        <Text style={{ fontSize: 11, fontWeight: "400", color: "#585858" }}>
+          {lastMessage && formatTime(lastMessage?.timeStamp)}
         </Text>
       </View>
     </Pressable>
