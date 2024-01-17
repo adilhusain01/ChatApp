@@ -86,6 +86,7 @@ const User = ({ item }) => {
         <Text style={{ fontWeight: "bold" }}>{item?.name}</Text>
         <Text style={{ marginTop: 4, color: "gray" }}>{item?.email}</Text>
       </View>
+
       {userFriends.includes(item._id) ? (
         <Pressable
           style={{
